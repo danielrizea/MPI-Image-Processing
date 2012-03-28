@@ -1,0 +1,32 @@
+Rizea Daniel-Octavian
+331CA
+
+
+					Tema 3 APD Prelucrare de imagini
+				
+				
+	Pentru o rulare se dau toti parametrii in linia de comanda (ca si in enuntul temei).
+		Ex : mpiexec -n 9 ./image picture.pgm 100 200 contrastOutput.pgm smooth filterOutput.pgm 1.0 1.0 1.0 residualOutput
+		
+	Pentru ca tema sa mearga in regula, numarul de procese trebuie sa fie mai mare sau egal cu numarul total de randuri pe care le are imaginea.
+	
+	Pentru partea cu filtre am ales varianta cu bordarea matricei, deasemenea, pentru a numara cat mai rapid probabilitatea unui simbol in poza, am determinat valorile minime si maxime din imaginea reziduala, dupa care am instantiat un vector de dimensiunea a atator elemente cate avem intre min si max, iar la intalnirea unui element de valoare val in matrice, am incrementat pozitia (-min + val) din vectorul declarat. Astfel am innumarat frecventele de aparitii mai rapid decat daca as fi cautat prin matrice pentru fiecare simbol numarul de aparitii.
+	
+	
+	Rezolvare : 
+	
+	Procesul 0 este cel care citeste poza initiala, (daca gaseste comentarii in poza le ignora)/
+	
+	
+	Fiecare proces in fuctie de rangul sau isi calculeaza proprieul sizeStrip (nr randuri pe care va opera).
+	Procesul 0 trimite informatii globale si celorlalte procese (gen width , m ).
+	
+	Dupa ce acesta a citit, urmeaza sa distribuie un numar sizeStrip de randuri fiecarui proces (isi asigneza si lui un sizeStrip), iar ultimului ii trimite numarul de randuri ramase ( daca N nu se imparte egal la P).
+	
+	
+		1.Contrastul . Fiecare proces isi calculeaza min, si max pe portiunea lor, dupa care cu MPI_Allreduce ( operatii MIN si MAX) fiecare proces va stii max si min din intregaa poza, dupa care fiecare proces isi caculeaza intr-un buffer local noua portiunea ajustata , dupa care fiecare proces trimite procesului 0 care reasambleza poza carui contrast a fost ajustat si o tipareste in fisierul de iesire.
+		
+		2.Un procedeu asemanator cu cel de la punctul 1, singurele diferente fiind functiile specifice pentru calculul diverselor filtre si comunicarea intre procese a liniilor necesare calcului filtrelor (linia cea mai de sus si linia cea mai de jos pentru un proces ce are ambii vecini). Fiecare proces pune la dispozitie liniile de care procesele vecine au nevoie si primeste liniile necesare lui pentru aplicarea filtrelor. Pentru calculul valorii am ales metoda bordarii matricei.
+		
+		3.Fiecare proces aplica predictorul pe portiunea sa (si liniile solicitate de la celelate procese), dupa care imaginea reziduala este asamblata la procesul 0 si printata de acesta, si tot procesul 0 calculeaza entropia.
+		
